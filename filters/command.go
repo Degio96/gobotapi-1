@@ -9,7 +9,7 @@ import (
 	"sync"
 )
 
-func Command(command string, aliasList ...string) FilterOperand {
+func Command(command string, useUsername bool, aliasList ...string) FilterOperand {
 	if len(aliasList) == 0 {
 		aliasList = []string{"/"}
 	}
@@ -25,7 +25,11 @@ func Command(command string, aliasList ...string) FilterOperand {
 			mutex.Lock()
 			botInfo := values.Client.Self()
 			if withoutPrefixCompilers[botInfo.ID] == nil {
-				withoutPrefixCompilers[botInfo.ID], _ = regexp.Compile(fmt.Sprintf("(?i)((%s)%s(?:@?%s)?)(?:\\s|$)", strings.Join(prefixes, "|"), command, botInfo.Username))
+				if useUsername {
+					withoutPrefixCompilers[botInfo.ID], _ = regexp.Compile(fmt.Sprintf("(?i)((%s)%s(?:@?%s)?)(?:\\s|$)", strings.Join(prefixes, "|"), command, botInfo.Username))
+				} else {
+					withoutPrefixCompilers[botInfo.ID], _ = regexp.Compile(fmt.Sprintf("(?i)((%s)%s)(?:\\s|$)", strings.Join(prefixes, "|"), command))
+				}
 			}
 			mutex.Unlock()
 			text := message.Text
